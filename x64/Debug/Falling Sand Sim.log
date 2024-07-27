@@ -1,7 +1,28 @@
 ﻿  Installing vcpkg dependencies to C:\PersonalCoding\Falling Sand Sim\vcpkg_installed\x64-windows\
   "C:\Users\Jesse\vcpkg\vcpkg.exe" install  --x-wait-for-lock --triplet "x64-windows" --vcpkg-root "C:\Users\Jesse\vcpkg\\" "--x-manifest-root=C:\PersonalCoding\Falling Sand Sim\\" "--x-install-root=C:\PersonalCoding\Falling Sand Sim\vcpkg_installed\x64-windows\\" 
-EXEC : error : while checking out baseline from commit 'ba2a6f44829fcd3a2fb8d2c095707a75bb6a3658', failed to `git show` versions/baseline.json. This may be fixed by fetching commits with `git fetch`.
+EXEC : error : while checking out baseline from commit '994b40edaeba8fdc6d79b00c8dbbf619cd0e8667', failed to `git show` versions/baseline.json. This may be fixed by fetching commits with `git fetch`.
 EXEC : error : git failed with exit code: (128).
-  fatal: path 'versions/baseline.json' exists on disk, but not in 'ba2a6f44829fcd3a2fb8d2c095707a75bb6a3658'
-  while checking out baseline ba2a6f44829fcd3a2fb8d2c095707a75bb6a3658
+  fatal: path 'versions/baseline.json' exists on disk, but not in '994b40edaeba8fdc6d79b00c8dbbf619cd0e8667'
+  while checking out baseline 994b40edaeba8fdc6d79b00c8dbbf619cd0e8667
+  while loading baseline version for glew
+EXEC : error : while checking out baseline from commit '994b40edaeba8fdc6d79b00c8dbbf619cd0e8667', failed to `git show` versions/baseline.json. This may be fixed by fetching commits with `git fetch`.
+EXEC : error : git failed with exit code: (128).
+  fatal: path 'versions/baseline.json' exists on disk, but not in '994b40edaeba8fdc6d79b00c8dbbf619cd0e8667'
+  while checking out baseline 994b40edaeba8fdc6d79b00c8dbbf619cd0e8667
+  while loading baseline version for glfw3
+EXEC : error : while checking out baseline from commit '994b40edaeba8fdc6d79b00c8dbbf619cd0e8667', failed to `git show` versions/baseline.json. This may be fixed by fetching commits with `git fetch`.
+EXEC : error : git failed with exit code: (128).
+  fatal: path 'versions/baseline.json' exists on disk, but not in '994b40edaeba8fdc6d79b00c8dbbf619cd0e8667'
+  while checking out baseline 994b40edaeba8fdc6d79b00c8dbbf619cd0e8667
+  while loading baseline version for glm
+EXEC : error : while checking out baseline from commit '994b40edaeba8fdc6d79b00c8dbbf619cd0e8667', failed to `git show` versions/baseline.json. This may be fixed by fetching commits with `git fetch`.
+EXEC : error : git failed with exit code: (128).
+  fatal: path 'versions/baseline.json' exists on disk, but not in '994b40edaeba8fdc6d79b00c8dbbf619cd0e8667'
+  while checking out baseline 994b40edaeba8fdc6d79b00c8dbbf619cd0e8667
+  while loading baseline version for imgui
+EXEC : error : while checking out baseline from commit '994b40edaeba8fdc6d79b00c8dbbf619cd0e8667', failed to `git show` versions/baseline.json. This may be fixed by fetching commits with `git fetch`.
+EXEC : error : git failed with exit code: (128).
+  fatal: path 'versions/baseline.json' exists on disk, but not in '994b40edaeba8fdc6d79b00c8dbbf619cd0e8667'
+  while checking out baseline 994b40edaeba8fdc6d79b00c8dbbf619cd0e8667
+  while loading baseline version for implot
 C:\Users\Jesse\vcpkg\scripts\buildsystems\msbuild\vcpkg.targets(183,5): error MSB3073: The command ""C:\Users\Jesse\vcpkg\vcpkg.exe" install  --x-wait-for-lock --triplet "x64-windows" --vcpkg-root "C:\Users\Jesse\vcpkg\\" "--x-manifest-root=C:\PersonalCoding\Falling Sand Sim\\" "--x-install-root=C:\PersonalCoding\Falling Sand Sim\vcpkg_installed\x64-windows\\" " exited with code 1.
