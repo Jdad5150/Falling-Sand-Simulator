@@ -1,0 +1,28 @@
+{
+    "name": "falling-sand-simulator",
+    "version": "0.1.0",
+    "description": "A physics-based falling sand simulator using C++, OpenGL, Dear ImGui, and ImPlot",
+    "dependencies": [
+        {
+            "name": "imgui",
+            "version>=": "1.90.6",
+            "features": [ "opengl3-binding", "glfw-binding" ]
+        },
+        {
+            "name": "glfw3",
+            "version>=": "3.4"
+        },
+        {
+            "name": "glew",
+            "version>=": "2.2.0#3"
+        },
+        {
+            "name": "glm",
+            "version>=": "1.0.1#2"
+        },
+        {
+            "name": "implot",
+            "version>=": "0.16"
+        }
+    ]
+}

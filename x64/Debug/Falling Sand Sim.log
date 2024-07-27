@@ -1,0 +1,5 @@
+﻿  Installing vcpkg dependencies to C:\PersonalCoding\Falling Sand Sim\vcpkg_installed\x64-windows\
+  "C:\Users\Jesse\vcpkg\vcpkg.exe" install  --x-wait-for-lock --triplet "x64-windows" --vcpkg-root "C:\Users\Jesse\vcpkg\\" "--x-manifest-root=C:\PersonalCoding\Falling Sand Sim\\" "--x-install-root=C:\PersonalCoding\Falling Sand Sim\vcpkg_installed\x64-windows\\" 
+EXEC : error : C:\PersonalCoding\Falling Sand Sim\vcpkg.json was rejected because it uses "version>=" and does not have a "builtin-baseline". This can be fixed by removing the uses of "version>=" or adding a "builtin-baseline".
+  See `vcpkg help versioning` for more information.
+C:\Users\Jesse\vcpkg\scripts\buildsystems\msbuild\vcpkg.targets(183,5): error MSB3073: The command ""C:\Users\Jesse\vcpkg\vcpkg.exe" install  --x-wait-for-lock --triplet "x64-windows" --vcpkg-root "C:\Users\Jesse\vcpkg\\" "--x-manifest-root=C:\PersonalCoding\Falling Sand Sim\\" "--x-install-root=C:\PersonalCoding\Falling Sand Sim\vcpkg_installed\x64-windows\\" " exited with code 1.
