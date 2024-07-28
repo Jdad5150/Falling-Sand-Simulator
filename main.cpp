@@ -19,8 +19,8 @@
 // Constants
 int WINDOW_WIDTH = 800;
 int WINDOW_HEIGHT = 600;
-const int GRID_WIDTH = 30;
-const int GRID_HEIGHT = 30;
+int GRID_WIDTH = 300;
+int GRID_HEIGHT = 200;
 bool isDragging = false;
 // Element types
 enum class ElementType { Air, Sand };
@@ -36,6 +36,15 @@ std::vector<std::vector<Element>> grid(GRID_HEIGHT, std::vector<Element>(GRID_WI
 
 // Store GPU usage data for plotting
 std::vector<float> gpuUsageData;
+
+// Used to store framerate
+////float values[90] = { 0 };
+////float x_values[90] = { 0 };
+////int values_offset = 0;
+
+const int history_size = 90;
+std::vector<float> framerate_values(history_size, 0.0f);
+int values_offset = 0;
 
 // Function prototypes
 GLuint CompileShader(GLenum type, const char* source);
@@ -166,8 +175,12 @@ int main() {
 
         ImGuiIO& io = ImGui::GetIO();
 
-        // Update simulation
-        UpdateSimulation(grid);
+        if (!io.WantCaptureMouse)
+        {
+            // Update simulation
+            UpdateSimulation(grid);
+        }
+        
 
         std::vector<float> GPUUsage;
 
@@ -176,7 +189,7 @@ int main() {
         float CurrentGPUUsage = IMGui::GetGPUUsage();
         GPUUsage.push_back(CurrentGPUUsage + 1);
        
-        std::cout << std::fixed << std::setprecision(5) << CurrentGPUUsage << std::endl;
+        //std::cout << std::fixed << std::setprecision(5) << CurrentGPUUsage << std::endl;
 
         
 
@@ -192,7 +205,19 @@ int main() {
         glUseProgram(0);        
 
         // Render ImGui
-        IMGui::RenderPlot(GPUUsage);
+        IMGui::RenderPlot(GPUUsage, GRID_WIDTH,GRID_HEIGHT);
+
+        
+
+       ///* values[values_offset] = io.Framerate;
+       // x_values[values_offset] = static_cast<float>(values_offset);
+       // values_offset = (values_offset + 1) % IM_ARRAYSIZE(values);*/
+
+        framerate_values[values_offset] = io.Framerate;
+        values_offset = (values_offset + 1) % history_size;
+        
+
+        IMGui::RenderPerformanceWindow(framerate_values, history_size);
 
         // Swap buffers
         glfwSwapBuffers(window);

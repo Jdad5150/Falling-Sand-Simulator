@@ -42,7 +42,7 @@ void IMGui::InitImGui(GLFWwindow* window)
 
 }
 
-void IMGui::RenderPlot(std::vector<float>& x_data)
+void IMGui::RenderPlot(std::vector<float>& x_data, int& GRID_WIDTH, int& GRID_HEIGHT)
 {
     //create a new ImGui Frame
     ImGui_ImplOpenGL3_NewFrame();
@@ -50,18 +50,25 @@ void IMGui::RenderPlot(std::vector<float>& x_data)
     ImGui::NewFrame();
 
     //Set the size
-    ImGui::SetNextWindowSize(ImVec2(1000, 500), ImGuiCond_Once);
+    ImGui::SetNextWindowSize(ImVec2(550, 150), ImGuiCond_FirstUseEver);
+    
 
     //Begin the Frame
-    ImGui::Begin("Performance");
+    ImGui::Begin("Tools");
 
     //Add Text
-    ImGui::Text("Control the fallling sand");
-
+    ImGui::Text("Change the size of the grid.");
     
+    //Create Grid Size combo box
+    SetWindowSizeComboBox(GRID_WIDTH, GRID_HEIGHT);
+
     // Debugging: Show IO values
     ImGuiIO& io = ImGui::GetIO();
 
+    // Scale the font bigger
+    io.FontGlobalScale = 1.5f;
+
+    ImGui::Text("Framerate: %.1f FPS", io.Framerate);
 
     //End the frame and render
     ImGui::End();
@@ -155,24 +162,85 @@ void IMGui::CreateGPUGraph(std::vector<float>& GPUUsageData)
     }
 }
 
-double IMGui::CalculateFPS()
+
+
+void IMGui::SetWindowSizeComboBox(int& GRID_WIDTH, int& GRID_HEIGHT)
 {
-    return 0.0;
+    const char* windowSizes[] =
+    {
+        "30 x 30",
+        "200 x 150",
+        "300 x 200"
+    };
+
+    static const char* currentSize = windowSizes[2];
+    static int selectedIndex = -1;
+
+    if (ImGui::BeginCombo("Grid Size", currentSize))
+    {
+        for (int i = 0; i < IM_ARRAYSIZE(windowSizes); ++i)
+        {
+            bool isSelected = (currentSize == windowSizes[i]);
+
+            if (ImGui::Selectable(windowSizes[i], isSelected))
+            {
+                currentSize = windowSizes[i];
+                selectedIndex = i;                
+            }
+            if (isSelected)
+            {
+                ImGui::SetItemDefaultFocus();
+            }
+        }
+        ImGui::EndCombo();
+    }
+
+    switch (selectedIndex)
+    {
+    case 0:
+        GRID_WIDTH = 30;
+        GRID_HEIGHT = 30;
+        break;
+        
+    case 1:
+        GRID_WIDTH = 200;
+        GRID_HEIGHT = 150;
+        break;
+    case 2:
+        GRID_WIDTH = 300;
+        GRID_HEIGHT = 200;
+        break;
+
+    default:
+        break;
+    }
+
 }
 
-void IMGui::AddFPSValue(std::vector<double> FPS, double newFPS)
-{
-}
 
-void IMGui::CreateFPSGraph()
-{
-}
 
-void IMGui::UpdateFrameTimes(float deltaTime)
+void IMGui::RenderPerformanceWindow(std::vector<float> framerate_values, int history_size)
 {
-}
+    
 
-float IMGui::GetFPS()
-{
-    return 0.0f;
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    ImGuiIO& io = ImGui::GetIO();    
+
+    ImGui::SetNextWindowSize(ImVec2(550, 150), ImGuiCond_FirstUseEver);
+    ImPlot::SetNextAxesLimits(0.0, 100.0, 0, 200);
+
+    ImGui::Begin("Performance");
+    ImGui::Text("Framerate: %.1f FPS", io.Framerate);
+
+    if (ImPlot::BeginPlot("Framerate Plot"))
+    {
+        ImPlot::PlotLine("Framerate", framerate_values.data(), history_size);
+        ImPlot::EndPlot();
+    }
+    ImGui::End();
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }

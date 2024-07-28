@@ -1,0 +1,30 @@
+///////////////////////////////////////////////////////
+/////////////////////VERTEX SHADER/////////////////////
+///////////////////////////////////////////////////////
+#shader vertex
+#version 330 core
+
+layout(location = 0) in vec2 aPos;
+layout(location = 1) in vec3 aColor;
+out vec3 ourColor;
+uniform mat4 transform;
+
+void main()
+{
+    gl_Position = transform * vec4(aPos, 0.0, 1.0);
+    ourColor = aColor;
+};
+
+///////////////////////////////////////////////////////
+////////////////////FRAGMENT SHADER////////////////////
+///////////////////////////////////////////////////////
+#shader fragment
+#version 330 core
+
+in vec3 ourColor;
+
+out vec4 FragColor;
+
+void main() {
+    FragColor = vec4(ourColor, 1.0f);
+};

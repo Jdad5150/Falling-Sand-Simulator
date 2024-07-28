@@ -22,14 +22,11 @@ private:
 
 public:
 	static void InitImGui(GLFWwindow* window);
-	static void RenderPlot(std::vector<float>& x_data);
+	static void RenderPlot(std::vector<float>& x_data, int& GRID_WIDTH, int& GRID_HEIGHT);
 	static void CleanupImGui();
 	static void processInput(GLFWwindow* window);
 	static float GetGPUUsage();
-	static void CreateGPUGraph(std::vector<float>& GPUUsageData);
-	static double CalculateFPS();
-	static void AddFPSValue(std::vector<double> FPS, double newFPS);
-	static void CreateFPSGraph();
-	void UpdateFrameTimes(float deltaTime);
-	static float GetFPS();
+	static void CreateGPUGraph(std::vector<float>& GPUUsageData);	
+	static void SetWindowSizeComboBox(int& GRID_WIDTH, int& GRID_HEIGHT);
+	static void RenderPerformanceWindow(std::vector<float> framerate_values, int history_size);
 };
