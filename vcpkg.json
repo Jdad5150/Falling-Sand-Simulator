@@ -1,7 +1,7 @@
 {
     "name": "falling-sand-simulator",
     "version": "0.1.0",
-    "builtin-baseline": "cced017fd5ffa33d4f4f2502ccaf384ba66a46e0",
+    "builtin-baseline": "a2938d0e28fdb82285ec1be1ab03f962cca3e6a3",
     "description": "A physics-based falling sand simulator using C++, OpenGL, Dear ImGui, and ImPlot",
     "dependencies": [
         {

@@ -12,14 +12,15 @@
 #include "implot.h"
 #include "implot_internal.h"
 #include <iomanip>
+#include <string>
 
 
 
 // Constants
 int WINDOW_WIDTH = 800;
 int WINDOW_HEIGHT = 600;
-const int GRID_WIDTH = 300;
-const int GRID_HEIGHT = 250;
+const int GRID_WIDTH = 30;
+const int GRID_HEIGHT = 30;
 bool isDragging = false;
 // Element types
 enum class ElementType { Air, Sand };
@@ -27,8 +28,7 @@ enum class ElementType { Air, Sand };
 // Element structure
 struct Element {
     ElementType type;
-    glm::vec3 color;
-    
+    glm::vec3 color;    
 };
 
 // Initialize the grid with air
@@ -91,17 +91,19 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // Create GLFW window
-    //GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Falling Sand Simulator", nullptr, nullptr);
-
     GLFWwindow* window = InitFullScreenWindow();
 
+    // Set the call back keys to the window
     glfwSetKeyCallback(window, KeyCallback);
 
+    //Make sure the window is initialized
     if (!window) {
         std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         return -1;
     }
+
+    //Make the current context, the window
     glfwMakeContextCurrent(window);
 
     // Initialize GLEW
@@ -129,11 +131,12 @@ int main() {
     // Vertex data setup
     float vertices[] = {
         // Positions   // Colors
-        -0.95f, -0.95f,  1.0f, 0.0f, 0.0f, // Bottom-left
-         0.95f, -0.95f,  1.0f, 0.0f, 0.0f, // Bottom-right
-         0.95f, 0.95f,   1.0f, 1.0f, 0.0f, // Top-right
-        -0.95f, 0.95f,   1.0f, 1.0f, 0.0f  // Top-left
+         1.0f, -1.0f,    1.0f, 0.0f, 0.0f, // Bottom-right
+        -1.0f, -1.0f,    1.0f, 1.0f, 0.0f, // Bottom-left
+        -1.0f,  1.0f,    1.0f, 0.0f, 0.0f,  // Top-left
+         1.0f,  1.0f,    0.0f, 0.0f, 0.0f // Top-right        
     };
+    
 
     GLuint VAO, VBO;
     glGenVertexArrays(1, &VAO);
@@ -158,7 +161,7 @@ int main() {
 
     // Main loop
     while (!glfwWindowShouldClose(window)) {
-       
+        
         IMGui::processInput(window);
 
         ImGuiIO& io = ImGui::GetIO();
@@ -252,17 +255,42 @@ GLuint CreateShaderProgram() {
     return shaderProgram;
 }
 
-void UpdateSimulation(std::vector<std::vector<Element>>& grid) {
+void UpdateSimulation(std::vector<std::vector<Element>>& grid)
+{
+    std::vector<std::vector<bool>> hasMoved(GRID_HEIGHT, std::vector<bool>(GRID_WIDTH, false));
+
     for (int y = GRID_HEIGHT - 2; y >= 0; --y) {
         for (int x = 0; x < GRID_WIDTH; ++x) {
-            if (grid[y][x].type == ElementType::Sand && grid[y + 1][x].type == ElementType::Air) {
-                std::swap(grid[y][x], grid[y + 1][x]);
+            if (hasMoved[y][x]) continue;
+
+            Element& currentElement = grid[y][x];
+
+            //If Sand
+            if (currentElement.type == ElementType::Sand) {
+                // Check if the cell below is within bounds and empty
+                if (y + 1 < GRID_HEIGHT && grid[y + 1][x].type == ElementType::Air && !hasMoved[y + 1][x])
+                {
+                    std::swap(currentElement, grid[y + 1][x]);
+                    hasMoved[y + 1][x] = true;
+                }
+                // Check if the cell below is sand and try to move diagonally
+                else if (y + 1 < GRID_HEIGHT && grid[y + 1][x].type == ElementType::Sand) {
+                    if (x > 0 && grid[y + 1][x - 1].type == ElementType::Air && !hasMoved[y + 1][x - 1]) {
+                        std::swap(currentElement, grid[y + 1][x - 1]);
+                        hasMoved[y + 1][x - 1] = true;
+                    }
+                    else if (x < GRID_WIDTH - 1 && grid[y + 1][x + 1].type == ElementType::Air && !hasMoved[y + 1][x + 1]) {
+                        std::swap(currentElement, grid[y + 1][x + 1]);
+                        hasMoved[y + 1][x + 1] = true;
+                    }
+                }
             }
         }
-    }
+    }  
 }
 
-void DrawGrid(const std::vector<std::vector<Element>>& grid, GLuint shaderProgram) {
+void DrawGrid(const std::vector<std::vector<Element>>& grid, GLuint shaderProgram)
+{
     glUseProgram(shaderProgram);
     GLuint transformLoc = glGetUniformLocation(shaderProgram, "transform");
 
@@ -271,6 +299,7 @@ void DrawGrid(const std::vector<std::vector<Element>>& grid, GLuint shaderProgra
             if (grid[y][x].type == ElementType::Air) continue;
 
             glm::mat4 transform = glm::mat4(1.0f);
+
             // Map grid coordinates to normalized device coordinates
             transform = glm::translate(transform, glm::vec3((x + 0.5f) / float(GRID_WIDTH) * 2.0f - 1.0f,
                 (GRID_HEIGHT - (y + 0.5f)) / float(GRID_HEIGHT) * 2.0f - 1.0f,
@@ -287,7 +316,8 @@ void DrawGrid(const std::vector<std::vector<Element>>& grid, GLuint shaderProgra
     }
 }
 
-void HandleMouseClick(double xpos, double ypos) {
+void HandleMouseClick(double xpos, double ypos)
+{
     // Convert screen coordinates to normalized device coordinates
     float normalizedX = (xpos / WINDOW_WIDTH) * 2.0f - 1.0f; // [-1, 1]
     float normalizedY = 1.0f - (ypos / WINDOW_HEIGHT) * 2.0f;
@@ -340,13 +370,18 @@ void MouseMotionCallback(GLFWwindow* window, double xpos, double ypos) {
         int gridX, gridY;
         ConvertNormalizedToGrid(normalizedX, normalizedY, gridX, gridY);
 
-        //std::cout << "Dragging at: (" << xpos << ", " << ypos << ") -> Normalized: (" << normalizedX << ", " << normalizedY << ") -> Grid Position: (" << gridX << ", " << gridY << ")" << std::endl;
+        // Check bounds and add sand to a 3x3 area
+        for (int dy = -1; dy <= 1; ++dy) {
+            for (int dx = -1; dx <= 1; ++dx) {
+                int newGridX = gridX + dx;
+                int newGridY = gridY + dy;
 
-        // Check bounds and add sand to the grid
-        if (gridX >= 0 && gridX < GRID_WIDTH && gridY >= 0 && gridY < GRID_HEIGHT) {
-            grid[gridY][gridX] = { ElementType::Sand }; // Example of adding sand
+                if (newGridX >= 0 && newGridX < GRID_WIDTH && newGridY >= 0 && newGridY < GRID_HEIGHT) {
+                    grid[newGridY][newGridX] = { ElementType::Sand };
+                }
+            }
         }
-    }
+    }   
 }
 
 

@@ -1,28 +1,8 @@
-﻿  Installing vcpkg dependencies to C:\PersonalCoding\Falling Sand Sim\vcpkg_installed\x64-windows\
-  "C:\Users\Jesse\vcpkg\vcpkg.exe" install  --x-wait-for-lock --triplet "x64-windows" --vcpkg-root "C:\Users\Jesse\vcpkg\\" "--x-manifest-root=C:\PersonalCoding\Falling Sand Sim\\" "--x-install-root=C:\PersonalCoding\Falling Sand Sim\vcpkg_installed\x64-windows\\" 
-EXEC : error : while checking out baseline from commit '994b40edaeba8fdc6d79b00c8dbbf619cd0e8667', failed to `git show` versions/baseline.json. This may be fixed by fetching commits with `git fetch`.
-EXEC : error : git failed with exit code: (128).
-  fatal: path 'versions/baseline.json' exists on disk, but not in '994b40edaeba8fdc6d79b00c8dbbf619cd0e8667'
-  while checking out baseline 994b40edaeba8fdc6d79b00c8dbbf619cd0e8667
-  while loading baseline version for glew
-EXEC : error : while checking out baseline from commit '994b40edaeba8fdc6d79b00c8dbbf619cd0e8667', failed to `git show` versions/baseline.json. This may be fixed by fetching commits with `git fetch`.
-EXEC : error : git failed with exit code: (128).
-  fatal: path 'versions/baseline.json' exists on disk, but not in '994b40edaeba8fdc6d79b00c8dbbf619cd0e8667'
-  while checking out baseline 994b40edaeba8fdc6d79b00c8dbbf619cd0e8667
-  while loading baseline version for glfw3
-EXEC : error : while checking out baseline from commit '994b40edaeba8fdc6d79b00c8dbbf619cd0e8667', failed to `git show` versions/baseline.json. This may be fixed by fetching commits with `git fetch`.
-EXEC : error : git failed with exit code: (128).
-  fatal: path 'versions/baseline.json' exists on disk, but not in '994b40edaeba8fdc6d79b00c8dbbf619cd0e8667'
-  while checking out baseline 994b40edaeba8fdc6d79b00c8dbbf619cd0e8667
-  while loading baseline version for glm
-EXEC : error : while checking out baseline from commit '994b40edaeba8fdc6d79b00c8dbbf619cd0e8667', failed to `git show` versions/baseline.json. This may be fixed by fetching commits with `git fetch`.
-EXEC : error : git failed with exit code: (128).
-  fatal: path 'versions/baseline.json' exists on disk, but not in '994b40edaeba8fdc6d79b00c8dbbf619cd0e8667'
-  while checking out baseline 994b40edaeba8fdc6d79b00c8dbbf619cd0e8667
-  while loading baseline version for imgui
-EXEC : error : while checking out baseline from commit '994b40edaeba8fdc6d79b00c8dbbf619cd0e8667', failed to `git show` versions/baseline.json. This may be fixed by fetching commits with `git fetch`.
-EXEC : error : git failed with exit code: (128).
-  fatal: path 'versions/baseline.json' exists on disk, but not in '994b40edaeba8fdc6d79b00c8dbbf619cd0e8667'
-  while checking out baseline 994b40edaeba8fdc6d79b00c8dbbf619cd0e8667
-  while loading baseline version for implot
-C:\Users\Jesse\vcpkg\scripts\buildsystems\msbuild\vcpkg.targets(183,5): error MSB3073: The command ""C:\Users\Jesse\vcpkg\vcpkg.exe" install  --x-wait-for-lock --triplet "x64-windows" --vcpkg-root "C:\Users\Jesse\vcpkg\\" "--x-manifest-root=C:\PersonalCoding\Falling Sand Sim\\" "--x-install-root=C:\PersonalCoding\Falling Sand Sim\vcpkg_installed\x64-windows\\" " exited with code 1.
+﻿  main.cpp
+C:\PersonalCoding\Falling Sand Sim\main.cpp(322,23): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\PersonalCoding\Falling Sand Sim\main.cpp(323,23): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\PersonalCoding\Falling Sand Sim\main.cpp(367,27): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\PersonalCoding\Falling Sand Sim\main.cpp(368,27): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+  Falling Sand Sim.vcxproj -> C:\PersonalCoding\Falling Sand Sim\x64\Debug\Falling Sand Sim.exe
+  'pwsh.exe' is not recognized as an internal or external command,
+  operable program or batch file.

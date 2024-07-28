@@ -1,4 +1,6 @@
 #include "IMGui.h"
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
 #include <GLFW/glfw3.h>
 
 void IMGui::InitImGui(GLFWwindow* window)
@@ -42,14 +44,18 @@ void IMGui::InitImGui(GLFWwindow* window)
 
 void IMGui::RenderPlot(std::vector<float>& x_data)
 {
+    //create a new ImGui Frame
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
+    //Set the size
     ImGui::SetNextWindowSize(ImVec2(1000, 500), ImGuiCond_Once);
 
-    ImGui::Begin("Falling Sand Simulator Controls");
+    //Begin the Frame
+    ImGui::Begin("Performance");
 
+    //Add Text
     ImGui::Text("Control the fallling sand");
 
     
@@ -57,6 +63,7 @@ void IMGui::RenderPlot(std::vector<float>& x_data)
     ImGuiIO& io = ImGui::GetIO();
 
 
+    //End the frame and render
     ImGui::End();
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -146,4 +153,26 @@ void IMGui::CreateGPUGraph(std::vector<float>& GPUUsageData)
 
         ImPlot::EndPlot();
     }
+}
+
+double IMGui::CalculateFPS()
+{
+    return 0.0;
+}
+
+void IMGui::AddFPSValue(std::vector<double> FPS, double newFPS)
+{
+}
+
+void IMGui::CreateFPSGraph()
+{
+}
+
+void IMGui::UpdateFrameTimes(float deltaTime)
+{
+}
+
+float IMGui::GetFPS()
+{
+    return 0.0f;
 }

@@ -10,6 +10,7 @@
 #include <nvml.h>
 #include <chrono>
 
+
 class IMGui
 {
 private:
@@ -28,7 +29,7 @@ public:
 	static void CreateGPUGraph(std::vector<float>& GPUUsageData);
 	static double CalculateFPS();
 	static void AddFPSValue(std::vector<double> FPS, double newFPS);
-	static void CreateFPSGraph();	
+	static void CreateFPSGraph();
 	void UpdateFrameTimes(float deltaTime);
 	static float GetFPS();
-
+};
