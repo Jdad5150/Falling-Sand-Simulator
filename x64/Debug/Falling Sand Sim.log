@@ -1,11 +1,8 @@
-﻿  IMGui.cpp
-C:\PersonalCoding\Falling Sand Sim\IMGui.cpp(159,73): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-  main.cpp
+﻿  main.cpp
 C:\PersonalCoding\Falling Sand Sim\main.cpp(347,23): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
 C:\PersonalCoding\Falling Sand Sim\main.cpp(348,23): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
 C:\PersonalCoding\Falling Sand Sim\main.cpp(392,27): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
 C:\PersonalCoding\Falling Sand Sim\main.cpp(393,27): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-  Generating Code...
   Falling Sand Sim.vcxproj -> C:\PersonalCoding\Falling Sand Sim\x64\Debug\Falling Sand Sim.exe
   'pwsh.exe' is not recognized as an internal or external command,
   operable program or batch file.

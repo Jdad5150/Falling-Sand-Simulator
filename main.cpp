@@ -217,7 +217,7 @@ int main() {
         values_offset = (values_offset + 1) % history_size;
         
 
-        IMGui::RenderPerformanceWindow(framerate_values, history_size);
+        //IMGui::RenderPerformanceWindow(framerate_values, history_size);
 
         // Swap buffers
         glfwSwapBuffers(window);
