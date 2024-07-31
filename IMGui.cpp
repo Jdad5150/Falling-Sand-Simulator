@@ -3,16 +3,22 @@
 #include "imgui_impl_glfw.h"
 #include <GLFW/glfw3.h>
 
+
+
 void IMGui::InitImGui(GLFWwindow* window)
 {
     IMGUI_CHECKVERSION();
+
     ImGui::CreateContext();
     ImPlot::CreateContext();
 
     ImGui::StyleColorsDark();
 
+    
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 130");
+
+    
 
     ImGuiStyle& style = ImGui::GetStyle();
     style.WindowPadding = ImVec2(15, 15);
@@ -40,48 +46,7 @@ void IMGui::InitImGui(GLFWwindow* window)
     io.MouseDoubleClickTime = 0.30f;
     io.MouseDoubleClickMaxDist = 6.0f;
 
-}
-
-void IMGui::RenderPlot(std::vector<float>& x_data, int& GRID_WIDTH, int& GRID_HEIGHT)
-{
-    //create a new ImGui Frame
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-
-    //Set the size
-    ImGui::SetNextWindowSize(ImVec2(550, 150), ImGuiCond_FirstUseEver);
     
-
-    //Begin the Frame
-    ImGui::Begin("Tools");
-
-    //Add Text
-    ImGui::Text("Change the size of the grid.");
-    
-    //Create Grid Size combo box
-    SetWindowSizeComboBox(GRID_WIDTH, GRID_HEIGHT);
-
-    // Debugging: Show IO values
-    ImGuiIO& io = ImGui::GetIO();
-
-    // Scale the font bigger
-    io.FontGlobalScale = 1.5f;
-
-    ImGui::Text("Framerate: %.1f FPS", io.Framerate);
-
-    //End the frame and render
-    ImGui::End();
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-}
-
-void IMGui::CleanupImGui()
-{
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImPlot::DestroyContext();
-    ImGui::DestroyContext();
 }
 
 void IMGui::processInput(GLFWwindow* window)
@@ -106,7 +71,148 @@ void IMGui::processInput(GLFWwindow* window)
         glfwSetWindowShouldClose(window, true);
 }
 
-float IMGui::GetGPUUsage()
+void IMGui::RenderUI(int& GRID_WIDTH, int& GRID_HEIGHT, std::vector<double>& GpuData, std::vector<double>& TimeData)
+{
+    //Create new frame
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    // Call functions to render different windows
+    RenderControlsWindow(GRID_WIDTH, GRID_HEIGHT);
+    RenderPerformanceWindow(GpuData, TimeData);
+
+    // Render and draw
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void IMGui::RenderControlsWindow(int& GRID_WIDTH, int& GRID_HEIGHT)
+{
+    //Set the size
+    ImGui::SetNextWindowSize(ImVec2(550, 150), ImGuiCond_FirstUseEver);
+    
+
+    //Begin the Window
+    ImGui::Begin("Tools");
+
+    //Add Text
+    ImGui::Text("Change the size of the grid.");
+    
+    //Create Grid Size combo box
+    SetWindowSizeComboBox(GRID_WIDTH, GRID_HEIGHT);
+
+    // Debugging: Show IO values
+    ImGuiIO& io = ImGui::GetIO();
+
+    // Scale the font bigger
+    io.FontGlobalScale = 1.5f;
+
+    
+    //End the frame and render
+    ImGui::End();
+    
+}
+
+void IMGui::SetWindowSizeComboBox(int& GRID_WIDTH, int& GRID_HEIGHT)
+{
+    const char* windowSizes[] =
+    {
+        "30 x 30",
+        "200 x 150",
+        "300 x 200"
+    };
+
+    static const char* currentSize = windowSizes[2];
+    static int selectedIndex = -1;
+
+    if (ImGui::BeginCombo("Grid Size", currentSize))
+    {
+        for (int i = 0; i < IM_ARRAYSIZE(windowSizes); ++i)
+        {
+            bool isSelected = (currentSize == windowSizes[i]);
+
+            if (ImGui::Selectable(windowSizes[i], isSelected))
+            {
+                currentSize = windowSizes[i];
+                selectedIndex = i;
+            }
+            if (isSelected)
+            {
+                ImGui::SetItemDefaultFocus();
+            }
+        }
+        ImGui::EndCombo();
+    }
+
+    switch (selectedIndex)
+    {
+    case 0:
+        GRID_WIDTH = 30;
+        GRID_HEIGHT = 30;
+        break;
+
+    case 1:
+        GRID_WIDTH = 200;
+        GRID_HEIGHT = 150;
+        break;
+    case 2:
+        GRID_WIDTH = 300;
+        GRID_HEIGHT = 200;
+        break;
+
+    default:
+        break;
+    }
+}
+
+void IMGui::RenderPerformanceWindow(std::vector<double>& GpuData, std::vector<double>& TimeData)
+{
+    // Set Default Window Size
+    ImVec2 defaultSize(550, 175);
+    ImGui::SetNextWindowSize(defaultSize, ImGuiCond_Once);
+    // Set Default position, and make unmoveable
+    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+
+    ImGui::Begin("Performance");
+    ImGuiIO& io = ImGui::GetIO();
+
+    ImGui::Text("Framerate: %.1f FPS", io.Framerate);
+
+    ImGui::Text("WARNING: DATA COLLECTION WILL IMPACT PERFORMANCE");
+    if (ImGui::Button(IMGui::isGatheringData == true ? "Stop Gathering Data" : "Start Gathering Data"))
+    {
+        IMGui::isGatheringData = !IMGui::isGatheringData;   
+        if (IMGui::isGatheringData == true)
+        {
+            ImGui::SetWindowSize(ImVec2(550, 500));
+        }
+        else
+        {
+            ImGui::SetWindowSize(defaultSize);
+        }
+    }
+
+    if (IMGui::isGatheringData == true)
+    {
+        CreateGPUGraph(GpuData, TimeData);
+    }
+
+    ImGui::End();
+}
+
+bool IMGui::GatherData()
+{
+    bool result = false;
+
+    if (IMGui::isGatheringData == true)
+    {
+        result = true;
+    }
+    return result;
+}
+
+double IMGui::GetGPUUsage()
 {
     nvmlReturn_t result;
     unsigned int deviceCount;
@@ -148,99 +254,30 @@ float IMGui::GetGPUUsage()
     nvmlShutdown();
 
     // Return GPU utilization percentage
-    return static_cast<float>(utilization.gpu);
+    return static_cast<double>(utilization.gpu);
     
 }
 
-void IMGui::CreateGPUGraph(std::vector<float>& GPUUsageData)
+void IMGui::CreateGPUGraph(std::vector<double>& GpuData, std::vector<double>& TimeData)
 {
+    ImPlot::SetNextAxesLimits(0.0f, 100.0f, 0.0f, 50.0f);
+    
+
     if (ImPlot::BeginPlot("GPU Usage (%)"))
-    {
-        ImPlot::PlotLine("Usage", GPUUsageData.data(), GPUUsageData.size());
+    {     
+        ImPlot::SetupAxis(ImAxis_Y1, "Utilization");
+
+        ImPlot::PlotLine("Usage", GpuData.data(), int(GpuData.size()));
 
         ImPlot::EndPlot();
     }
 }
 
-
-
-void IMGui::SetWindowSizeComboBox(int& GRID_WIDTH, int& GRID_HEIGHT)
+void IMGui::CleanupImGui()
 {
-    const char* windowSizes[] =
-    {
-        "30 x 30",
-        "200 x 150",
-        "300 x 200"
-    };
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImPlot::DestroyContext();
+    ImGui::DestroyContext();
 
-    static const char* currentSize = windowSizes[2];
-    static int selectedIndex = -1;
-
-    if (ImGui::BeginCombo("Grid Size", currentSize))
-    {
-        for (int i = 0; i < IM_ARRAYSIZE(windowSizes); ++i)
-        {
-            bool isSelected = (currentSize == windowSizes[i]);
-
-            if (ImGui::Selectable(windowSizes[i], isSelected))
-            {
-                currentSize = windowSizes[i];
-                selectedIndex = i;                
-            }
-            if (isSelected)
-            {
-                ImGui::SetItemDefaultFocus();
-            }
-        }
-        ImGui::EndCombo();
-    }
-
-    switch (selectedIndex)
-    {
-    case 0:
-        GRID_WIDTH = 30;
-        GRID_HEIGHT = 30;
-        break;
-        
-    case 1:
-        GRID_WIDTH = 200;
-        GRID_HEIGHT = 150;
-        break;
-    case 2:
-        GRID_WIDTH = 300;
-        GRID_HEIGHT = 200;
-        break;
-
-    default:
-        break;
-    }
-
-}
-
-
-
-void IMGui::RenderPerformanceWindow(std::vector<float> framerate_values, int history_size)
-{
-    
-
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-
-    ImGuiIO& io = ImGui::GetIO();    
-
-    ImGui::SetNextWindowSize(ImVec2(550, 150), ImGuiCond_FirstUseEver);
-    ImPlot::SetNextAxesLimits(0.0, 100.0, 0, 200);
-
-    ImGui::Begin("Performance");
-    ImGui::Text("Framerate: %.1f FPS", io.Framerate);
-
-    if (ImPlot::BeginPlot("Framerate Plot"))
-    {
-        ImPlot::PlotLine("Framerate", framerate_values.data(), history_size);
-        ImPlot::EndPlot();
-    }
-    ImGui::End();
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }

@@ -13,6 +13,7 @@
 #include "implot_internal.h"
 #include <iomanip>
 #include <string>
+#include <map>
 
 
 
@@ -22,6 +23,8 @@ int WINDOW_HEIGHT = 600;
 int GRID_WIDTH = 300;
 int GRID_HEIGHT = 200;
 bool isDragging = false;
+double frameNumber = 0.0f;
+
 // Element types
 enum class ElementType { Air, Sand };
 
@@ -35,16 +38,9 @@ struct Element {
 std::vector<std::vector<Element>> grid(GRID_HEIGHT, std::vector<Element>(GRID_WIDTH, { ElementType::Air, {0.0f, 0.0f, 0.0f} }));
 
 // Store GPU usage data for plotting
-std::vector<float> gpuUsageData;
+std::vector<double> gpuData;
+std::vector<double> timeData;
 
-// Used to store framerate
-////float values[90] = { 0 };
-////float x_values[90] = { 0 };
-////int values_offset = 0;
-
-const int history_size = 90;
-std::vector<float> framerate_values(history_size, 0.0f);
-int values_offset = 0;
 
 // Function prototypes
 GLuint CompileShader(GLenum type, const char* source);
@@ -59,7 +55,7 @@ void MouseMotionCallback(GLFWwindow* window, double xpos, double ypos);
 GLFWwindow* InitFullScreenWindow();
 void AdjustViewport(int width, int height);
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-void ConvertNormalizedToGrid(float normalizedX, float normalizedY, int& gridX, int& gridY);
+void ConvertNormalizedToGrid(double normalizedX, double normalizedY, int& gridX, int& gridY);
 float GetDeltaTime();
 
 
@@ -129,6 +125,7 @@ int main() {
     GLuint shaderProgram = CreateShaderProgram();
 
     // Initialize ImGui    
+   
     IMGui::InitImGui(window);
 
     // Set mouse button callback
@@ -137,61 +134,81 @@ int main() {
     // Set mouse motion callback
     glfwSetCursorPosCallback(window, MouseMotionCallback);
 
+    
+  
+
     // Vertex data setup
     float vertices[] = {
-        // Positions   // Colors
-         1.0f, -1.0f,    1.0f, 0.0f, 0.0f, // Bottom-right
-        -1.0f, -1.0f,    1.0f, 1.0f, 0.0f, // Bottom-left
-        -1.0f,  1.0f,    1.0f, 0.0f, 0.0f,  // Top-left
-         1.0f,  1.0f,    0.0f, 0.0f, 0.0f // Top-right        
-    };
+       // Positions           // Colors
+         1.0f,  1.0f,    0.917f, 0.808f, 0.416f,// Top-Right
+         1.0f, -1.0f,    0.451f, 0.329f, 0.196f,// Bottom-Righ
+        -1.0f,  1.0f,    0.933f, 0.847f, 0.533f,// Top-left
+        -1.0f, -1.0f,    0.588f, 0.482f, 0.275f // Top-right        
+    };    
     
 
-    GLuint VAO, VBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
+    // Declare Vertex Array Object (VAO) and Vertex Buffer Object (VBO)
+    GLuint VAO;
+    GLuint VBO;
 
+    // Generate and bind the VAO
+    glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
 
+    // Generate and bind the VBO
+    glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    // Copy vertex data to the buffer
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+    // Define the vertex attribute for position (location = 0)
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(0); // Enable the vertex attribute
 
+    // Define the vertex attribute for color (location = 1)
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(2 * sizeof(float)));
-    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(1); // Enable the vertex attribute
 
+    // Unbind the VBO (optional)
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+    // Unbind the VAO (optional)
     glBindVertexArray(0);
 
-   
-
+    
+    
     // Main loop
     while (!glfwWindowShouldClose(window)) {
         
+        //set background to light blue
+        glClearColor(0.5f, 0.7f, 1.0f, 1.0f);
+
         IMGui::processInput(window);
 
         ImGuiIO& io = ImGui::GetIO();
 
-        if (!io.WantCaptureMouse)
+       
+        // Update simulation
+        UpdateSimulation(grid);
+        
+        
+        if (IMGui::GatherData() == true)
         {
-            // Update simulation
-            UpdateSimulation(grid);
+            // keep only 100 data points in the vectors
+            if (gpuData.size() > 100)
+            {
+                gpuData.erase(gpuData.begin());
+                timeData.erase(timeData.begin());
+            }
+
+            // time and gpu data to the vectors
+            timeData.push_back(frameNumber);
+            gpuData.push_back(IMGui::GetGPUUsage());
         }
         
 
-        std::vector<float> GPUUsage;
-
-        
-
-        float CurrentGPUUsage = IMGui::GetGPUUsage();
-        GPUUsage.push_back(CurrentGPUUsage + 1);
        
-        //std::cout << std::fixed << std::setprecision(5) << CurrentGPUUsage << std::endl;
-
-        
 
         // Clear screen
         glClear(GL_COLOR_BUFFER_BIT);        
@@ -205,25 +222,19 @@ int main() {
         glUseProgram(0);        
 
         // Render ImGui
-        IMGui::RenderPlot(GPUUsage, GRID_WIDTH,GRID_HEIGHT);
-
-        
-
-       ///* values[values_offset] = io.Framerate;
-       // x_values[values_offset] = static_cast<float>(values_offset);
-       // values_offset = (values_offset + 1) % IM_ARRAYSIZE(values);*/
-
-        framerate_values[values_offset] = io.Framerate;
-        values_offset = (values_offset + 1) % history_size;
-        
-
-        //IMGui::RenderPerformanceWindow(framerate_values, history_size);
+        IMGui::RenderUI(GRID_WIDTH, GRID_HEIGHT, gpuData, timeData);
 
         // Swap buffers
         glfwSwapBuffers(window);
 
         // Poll events
        glfwPollEvents();
+
+       if (IMGui::GatherData() == true)
+       {
+           frameNumber++;
+       }
+       
     }
 
 
@@ -282,31 +293,35 @@ GLuint CreateShaderProgram() {
 
 void UpdateSimulation(std::vector<std::vector<Element>>& grid)
 {
-    std::vector<std::vector<bool>> hasMoved(GRID_HEIGHT, std::vector<bool>(GRID_WIDTH, false));
+    //std::vector<std::vector<bool>> hasMoved(GRID_HEIGHT, std::vector<bool>(GRID_WIDTH, false));
 
-    for (int y = GRID_HEIGHT - 2; y >= 0; --y) {
-        for (int x = 0; x < GRID_WIDTH; ++x) {
-            if (hasMoved[y][x]) continue;
+    for (int y = GRID_HEIGHT - 2; y >= 0; --y)
+    {
+        for (int x = 0; x < GRID_WIDTH; ++x)
+        {
+           // if (hasMoved[y][x]) continue;
 
             Element& currentElement = grid[y][x];
 
             //If Sand
             if (currentElement.type == ElementType::Sand) {
                 // Check if the cell below is within bounds and empty
-                if (y + 1 < GRID_HEIGHT && grid[y + 1][x].type == ElementType::Air && !hasMoved[y + 1][x])
+                if (y + 1 < GRID_HEIGHT && grid[y + 1][x].type == ElementType::Air)
                 {
                     std::swap(currentElement, grid[y + 1][x]);
-                    hasMoved[y + 1][x] = true;
+                    //hasMoved[y + 1][x] = true;
                 }
                 // Check if the cell below is sand and try to move diagonally
-                else if (y + 1 < GRID_HEIGHT && grid[y + 1][x].type == ElementType::Sand) {
-                    if (x > 0 && grid[y + 1][x - 1].type == ElementType::Air && !hasMoved[y + 1][x - 1]) {
+                else if (y + 1 < GRID_HEIGHT && grid[y + 1][x].type == ElementType::Sand)
+                {
+                    if (x > 0 && grid[y + 1][x - 1].type == ElementType::Air) {
                         std::swap(currentElement, grid[y + 1][x - 1]);
-                        hasMoved[y + 1][x - 1] = true;
+                        //hasMoved[y + 1][x - 1] = true;
                     }
-                    else if (x < GRID_WIDTH - 1 && grid[y + 1][x + 1].type == ElementType::Air && !hasMoved[y + 1][x + 1]) {
+                    else if (x < GRID_WIDTH - 1 && grid[y + 1][x + 1].type == ElementType::Air)
+                    {
                         std::swap(currentElement, grid[y + 1][x + 1]);
-                        hasMoved[y + 1][x + 1] = true;
+                        //hasMoved[y + 1][x + 1] = true;
                     }
                 }
             }
@@ -344,8 +359,8 @@ void DrawGrid(const std::vector<std::vector<Element>>& grid, GLuint shaderProgra
 void HandleMouseClick(double xpos, double ypos)
 {
     // Convert screen coordinates to normalized device coordinates
-    float normalizedX = (xpos / WINDOW_WIDTH) * 2.0f - 1.0f; // [-1, 1]
-    float normalizedY = 1.0f - (ypos / WINDOW_HEIGHT) * 2.0f;
+    double normalizedX = (xpos / WINDOW_WIDTH) * 2.0f - 1.0f; // [-1, 1]
+    double normalizedY = 1.0f - (ypos / WINDOW_HEIGHT) * 2.0f;
 
     // Map normalized coordinates to grid coordinates
     int gridX = static_cast<int>((normalizedX + 1.0f) * 0.5f * GRID_WIDTH);
@@ -389,8 +404,8 @@ void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 void MouseMotionCallback(GLFWwindow* window, double xpos, double ypos) {
     if (isDragging) {
         // Convert window coordinates to normalized device coordinates
-        float normalizedX = (xpos / WINDOW_WIDTH) * 2.0f - 1.0f;
-        float normalizedY = 1.0f - (ypos / WINDOW_HEIGHT) * 2.0f;
+        double normalizedX = (xpos / WINDOW_WIDTH) * 2.0f - 1.0f;
+        double normalizedY = 1.0f - (ypos / WINDOW_HEIGHT) * 2.0f;
 
         int gridX, gridY;
         ConvertNormalizedToGrid(normalizedX, normalizedY, gridX, gridY);
@@ -457,7 +472,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     }
 }
 
-void ConvertNormalizedToGrid(float normalizedX, float normalizedY, int& gridX, int& gridY)
+void ConvertNormalizedToGrid(double normalizedX, double normalizedY, int& gridX, int& gridY)
 {
     gridX = static_cast<int>((normalizedX + 1.0f) * 0.5f * GRID_WIDTH);
     gridY = static_cast<int>((1.0f - normalizedY) * 0.5f * GRID_HEIGHT);

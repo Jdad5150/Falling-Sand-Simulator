@@ -14,19 +14,25 @@
 class IMGui
 {
 private:
-	int MAX_FRAMES = 100;
-	float frameTimes[100];
-	int frameIndex = 0;
-	float frameTimeSum = 0.0f;
+	static inline bool isGatheringData = false;
 
 
 public:
-	static void InitImGui(GLFWwindow* window);
-	static void RenderPlot(std::vector<float>& x_data, int& GRID_WIDTH, int& GRID_HEIGHT);
-	static void CleanupImGui();
+	// Initialize ImGui and set styles
+	static void InitImGui(GLFWwindow* window); 
+	// Used to process input, mouse/keyboard
 	static void processInput(GLFWwindow* window);
-	static float GetGPUUsage();
-	static void CreateGPUGraph(std::vector<float>& GPUUsageData);	
+	// Main Function used to render all ImGui and ImPlot UI
+	static void RenderUI(int& GRID_WIDTH, int& GRID_HEIGHT, std::vector<double>& GpuData, std::vector<double>& TimeData);
+	// Functions used to create widgets and render Controls
+	static void RenderControlsWindow(int& GRID_WIDTH, int& GRID_HEIGHT);
 	static void SetWindowSizeComboBox(int& GRID_WIDTH, int& GRID_HEIGHT);
-	static void RenderPerformanceWindow(std::vector<float> framerate_values, int history_size);
+	// Functions used to gather data, create widgets and render data 
+	static void RenderPerformanceWindow(std::vector<double>& GpuData, std::vector<double>& TimeData);
+	static bool GatherData();
+	static double GetGPUUsage();
+	static void CreateGPUGraph(std::vector<double>& GpuData, std::vector<double>& TimeData);
+	// Cleanup all ImGui 
+	static void CleanupImGui();
+	
 };
